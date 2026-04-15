@@ -2,14 +2,14 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CICLO DEL NITRÓGENO</title>
+    <title>CICLO DEL NITRÓGENO PRO</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/MTLLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <style>
-        :root { --neon: #00f2fe; --purple: #bc13fe; --bg: #010811; --danger: #ff0055; }
+        :root { --neon: #00f2fe; --purple: #bc13fe; --bg: #010811; --danger: #ff0055; --text: #b0e0ff; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body { 
@@ -24,23 +24,34 @@
         .scene.active { display: flex; animation: fadeIn 0.5s ease-in; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* CARTAS DE CONTENIDO */
+        /* CARTAS DE MOLÉCULAS */
         .mol-card { display: grid; grid-template-columns: 1.2fr 1fr; width: 90%; max-width: 1100px; background: rgba(0, 15, 30, 0.9); border: 2px solid var(--neon); border-radius: 15px; padding: 40px; box-shadow: 0 0 50px rgba(0,242,254,0.15); }
         .mol-text h2 { font-family: 'Orbitron'; font-size: 4.5rem; color: var(--neon); text-shadow: 0 0 20px var(--neon); }
-        .mol-text p { font-size: 1.4rem; line-height: 1.6; margin: 20px 0; color: #b0e0ff; }
+        .mol-text p { font-size: 1.2rem; line-height: 1.5; margin: 15px 0; color: var(--text); }
 
-        /* RULETA MEJORADA */
-        .wheel-container { position: relative; width: 520px; height: 520px; }
+        /* SECCIÓN CICLO (NUEVA) */
+        .cycle-container { width: 90%; max-width: 1000px; height: 70vh; overflow-y: auto; padding-right: 20px; }
+        .cycle-step { position: relative; border-left: 3px solid var(--purple); margin-bottom: 30px; padding-left: 30px; }
+        .cycle-step::before { content: ''; position: absolute; left: -10px; top: 0; width: 18px; height: 18px; background: var(--neon); border-radius: 50%; box-shadow: 0 0 15px var(--neon); }
+        .cycle-step h3 { font-family: 'Orbitron'; color: var(--neon); font-size: 1.8rem; margin-bottom: 10px; }
+        .cycle-step p { font-size: 1.1rem; color: var(--text); line-height: 1.4; }
+        
+        /* SCROLLBAR PERSONALIZADA */
+        .cycle-container::-webkit-scrollbar { width: 8px; }
+        .cycle-container::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 10px; }
+
+        /* RULETA */
+        .wheel-container { position: relative; width: 500px; height: 500px; }
         #wheelCanvas { border-radius: 50%; border: 8px solid #fff; box-shadow: 0 0 60px var(--neon); background: #000; }
         .marker { position: absolute; top: -35px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 25px solid transparent; border-right: 25px solid transparent; border-top: 50px solid var(--danger); z-index: 50; }
 
         /* BOTÓN MAESTRO */
-        .master-btn { position: fixed; bottom: 40px; right: 40px; background: var(--neon); color: #000; padding: 20px 60px; border: none; font-family: 'Orbitron'; font-weight: bold; cursor: pointer; font-size: 1.3rem; transition: 0.3s; z-index: 1000; clip-path: polygon(0 20%, 10% 0, 100% 0, 100% 80%, 90% 100%, 0 100%); }
-        .master-btn:hover { transform: scale(1.05); background: #fff; box-shadow: 0 0 30px var(--neon); }
+        .master-btn { position: fixed; bottom: 40px; right: 40px; background: var(--neon); color: #000; padding: 20px 60px; border: none; font-family: 'Orbitron'; font-weight: bold; cursor: pointer; font-size: 1.2rem; z-index: 1000; clip-path: polygon(0 20%, 10% 0, 100% 0, 100% 80%, 90% 100%, 0 100%); transition: 0.3s; }
+        .master-btn:hover { background: #fff; transform: scale(1.05); }
 
         /* OVERLAY */
-        #res-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .res-banner { border: 4px solid var(--purple); padding: 50px; background: #000; box-shadow: 0 0 100px var(--purple); }
+        #res-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; }
+        .res-banner { border: 4px solid var(--purple); padding: 50px; background: #000; text-align: center; }
     </style>
 </head>
 <body>
@@ -49,9 +60,9 @@
     <button class="master-btn" id="ctrlBtn" onclick="masterControl()">Comenzar >></button>
 
     <section id="s-portada" class="scene active">
-        <h1 style="font-family:'Orbitron'; font-size:7rem; color:var(--neon); text-shadow:0 0 40px var(--neon);">CICLO DEL NITRÓGENO</h1>
+        <h1 style="font-family:'Orbitron'; font-size:6rem; color:var(--neon); text-shadow:0 0 40px var(--neon); text-align: center;">CICLO DEL NITRÓGENO</h1>
         <div style="border-top: 2px solid var(--purple); margin-top: 20px; padding-top: 10px;">
-            <p style="font-size:1.8rem; letter-spacing:12px;">CARLOS, YANDIEL, ZABDIEL, GEOVANNY</p>
+            <p style="font-size:1.5rem; letter-spacing:10px;">CARLOS, YANDIEL, ZABDIEL, GEOVANNY</p>
         </div>
     </section>
 
@@ -59,10 +70,36 @@
         <div class="mol-card">
             <div class="mol-text">
                 <h2 id="disp-title">N2</h2>
-                <p id="disp-desc">Iniciando base de datos...</p>
-                <div id="disp-extra" style="color:var(--purple); font-weight:bold; font-size:1.2rem; border-left: 3px solid var(--purple); padding-left: 15px;"></div>
+                <p id="disp-desc">Cargando...</p>
+                <div id="disp-extra" style="color:var(--purple); font-weight:bold; font-size:1.1rem; border-left: 3px solid var(--purple); padding-left: 15px;"></div>
             </div>
-            <div id="3d-frame" style="height:450px;"></div>
+            <div id="3d-frame" style="height:400px;"></div>
+        </div>
+    </section>
+
+    <section id="s-ciclo" class="scene">
+        <h2 style="font-family:'Orbitron'; color:var(--neon); margin-bottom: 30px; font-size: 3rem;">EL PROCESO BIOLÓGICO</h2>
+        <div class="cycle-container">
+            <div class="cycle-step">
+                <h3>1. FIJACIÓN</h3>
+                <p>El nitrógeno atmosférico (N2) es convertido en amoníaco (NH3) por bacterias en el suelo y raíces de leguminosas. También ocurre por la energía de los rayos durante tormentas.</p>
+            </div>
+            <div class="cycle-step">
+                <h3>2. NITRIFICACIÓN</h3>
+                <p>Bacterias especializadas oxidan el amoníaco transformándolo primero en Nitritos (NO2) y luego en Nitratos (NO3), la forma más aprovechable por los seres vivos.</p>
+            </div>
+            <div class="cycle-step">
+                <h3>3. ASIMILACIÓN</h3>
+                <p>Las plantas absorben los nitratos a través de sus raíces para fabricar proteínas y ADN. Los animales obtienen su nitrógeno comiendo plantas u otros animales.</p>
+            </div>
+            <div class="cycle-step">
+                <h3>4. AMONIFICACIÓN</h3>
+                <p>Cuando los seres vivos mueren o excretan desechos, los descomponedores (hongos y bacterias) devuelven el nitrógeno al suelo en forma de amoníaco.</p>
+            </div>
+            <div class="cycle-step">
+                <h3>5. DESNITRIFICACIÓN</h3>
+                <p>Finalmente, otras bacterias convierten los nitratos de nuevo en gas nitrógeno (N2), el cual regresa a la atmósfera, completando el ciclo eterno.</p>
+            </div>
         </div>
     </section>
 
@@ -71,20 +108,20 @@
             <div class="marker"></div>
             <canvas id="wheelCanvas" width="500" height="500"></canvas>
         </div>
-        <button id="spinBtn" onclick="startSpin()" style="margin-top:40px; background:var(--danger); color:white; padding:15px 50px; border:none; font-family:'Orbitron'; cursor:pointer; font-weight:bold; font-size:1.2rem;">GIRAR</button>
+        <button id="spinBtn" onclick="startSpin()" style="margin-top:30px; background:var(--danger); color:white; padding:15px 40px; border:none; font-family:'Orbitron'; cursor:pointer; font-weight:bold;">GIRAR</button>
     </section>
 
     <section id="s-final" class="scene">
-        <h1 style="font-family:'Orbitron'; font-size:8rem; color:var(--neon); text-shadow:0 0 30px var(--neon);">FIN.</h1>
+        <h1 style="font-family:'Orbitron'; font-size:7rem; color:var(--neon);">FIN.</h1>
         <p style="font-size:2rem; color:var(--purple); letter-spacing:10px;">PROYECTO COMPLETADO</p>
     </section>
 
     <div id="res-overlay">
         <div class="res-banner">
-            <h1 id="win-name" style="color:var(--neon); font-size:5rem; font-family:'Orbitron';"></h1>
-            <p style="color:#fff; margin:20px 0; font-size:1.5rem;">PREGUNTA ASIGNADA:</p>
-            <div id="win-quest" style="font-size:2.2rem; background:rgba(255,255,255,0.05); padding:40px; border:1px solid #333; color:var(--neon);"></div>
-            <button onclick="closeResult()" style="margin-top:30px; padding:15px 40px; cursor:pointer; font-family:'Orbitron';">ENTENDIDO</button>
+            <h1 id="win-name" style="color:var(--neon); font-size:4rem; font-family:'Orbitron';"></h1>
+            <p style="color:#fff; margin:15px 0;">PREGUNTA ASIGNADA:</p>
+            <div id="win-quest" style="font-size:1.8rem; background:rgba(0,242,254,0.1); padding:30px; border:1px solid var(--neon); color: #fff;"></div>
+            <button onclick="closeResult()" style="margin-top:25px; padding:10px 30px; cursor:pointer;">CONTINUAR</button>
         </div>
     </div>
 
@@ -94,38 +131,45 @@
         let rotation = 0;
         const alumnos = ["Juan", "Santiago", "Gleiliannys", "Yolfran", "Andrew", "Profe", "Sebastian", "Joseilys", "Allys", "Juana", "Lizolet", "Wilkely", "Maikely", "Camila", "Betsaida", "Isaac", "Dariannys"];
         const preguntas = [
-            "¿Cuál es el símbolo y número atómico?",
-            "¿Qué enlace tiene la molécula de N2?",
-            "¿Cómo se llama el proceso de N2 a NH3?",
-            "¿A qué temperatura hierve el nitrógeno?",
-            "¿Por qué el amonio (NH4) es vital?"
+            "¿Cuál es el símbolo y número atómico del Nitrógeno?",
+            "¿Qué tipo de enlace une a la molécula de N2?",
+            "¿En qué consiste el paso de la Fijación?",
+            "¿Cuál es la función de los descomponedores en la amonificación?",
+            "¿Por qué es importante el proceso de Desnitrificación?"
         ];
 
         const data = [
-            { t: "N2", d: "El N2 es la fórmula química del nitrógeno molecular o gas nitrógeno, un gas inerte, incoloro, inodoro e insípido que constituye aproximadamente el 78% de la atmósfera terrestre. Es una molécula estable formada por dos átomos de nitrógeno unidos por un triple enlace, fundamental para la vida y muy usado industrialmente como atmósfera inerte.", e: "Triple Enlace Covalente / Muy Estable" },
-            { t: "NH3", d: "El NH3 es la fórmula química del amoníaco (o amoniaco), un compuesto inorgánico incoloro, gaseoso y con un olor penetrante y característico. Está compuesto por un átomo de nitrógeno y tres de hidrógeno. Es un compuesto esencial en la industria para fertilizantes y productos de limpieza, además de ser vital para los procesos biológicos.", e: "Geometría Piramidal / Olor Penetrante" },
-            { t: "NH4", d: "El NH4 es el ion amonio, un catión (ion con carga positiva) formado por un átomo de nitrógeno y cuatro de hidrógeno. El NH4 es el ion amonio, un catión (ion con carga positiva) formado por un átomo de nitrógeno y cuatro de hidrógeno.", e: "Catión Acuoso / Nutriente Base" },
-            { t: "NO2", d: "El dióxido de nitrógeno NO2 es un gas inorgánico altamente reactivo, de color pardo-rojizo y olor penetrante, formado por nitrógeno y oxígeno. Es un contaminante atmosférico clave, producido principalmente por la combustión de combustibles fósiles (tráfico y centrales térmicas), y causa graves problemas respiratorios, irritación y lluvia ácida.", e: "Subproducto de Combustión / Tóxico" },
-            { t: "NO3", d: "El nitrato NO3 es un ion poliatómico inorgánico formado por un átomo de nitrógeno y tres de oxígeno (\(1N + 3O\)), con carga negativa. Es un nutriente esencial para las plantas, componente clave de fertilizantes, conservante de alimentos y un subproducto en el tratamiento de aguas, crucial en el ciclo del nitrógeno.", e: "Altamente Soluble / Crecimiento Vegetal" }
+            { t: "N2", d: "Gas inerte que constituye el 78% de la atmósfera. Su triple enlace lo hace extremadamente difícil de romper.", e: "Triple Enlace Covalente / Muy Estable" },
+            { t: "NH3", d: "Amoníaco. Compuesto gaseoso vital para fertilizantes, producido naturalmente por bacterias fijadoras.", e: "Geometría Piramidal / Olor Penetrante" },
+            { t: "NH4", d: "Ion Amonio. Catión formado por la captación de protones. Es la forma segura de nitrógeno en el suelo.", e: "Catión Acuoso / Nutriente Base" },
+            { t: "NO2", d: "Dióxido de Nitrógeno. Gas tóxico pardo-rojizo. Interviene en la formación de la lluvia ácida.", e: "Subproducto de Combustión / Tóxico" },
+            { t: "NO3", d: "Nitrato. La forma más estable y absorbible para las plantas. Motor del crecimiento vegetal.", e: "Altamente Soluble / Crecimiento" }
         ];
 
         function masterControl() {
+            const btn = document.getElementById('ctrlBtn');
+            
             if (currentStep === "portada") {
                 changeScene("s-portada", "s-moleculas");
                 renderMolecule();
                 currentStep = "moleculas";
-                document.getElementById('ctrlBtn').innerText = "SIGUIENTE MOLÉCULA >>";
+                btn.innerText = "SIGUIENTE MOLÉCULA >>";
             } 
             else if (currentStep === "moleculas") {
                 mIdx++;
                 if (mIdx < data.length) {
                     renderMolecule();
                 } else {
-                    changeScene("s-moleculas", "s-ruleta");
-                    initWheel();
-                    currentStep = "ruleta";
-                    document.getElementById('ctrlBtn').style.display = "none";
+                    changeScene("s-moleculas", "s-ciclo");
+                    currentStep = "ciclo";
+                    btn.innerText = "IR A LA RULETA >>";
                 }
+            }
+            else if (currentStep === "ciclo") {
+                changeScene("s-ciclo", "s-ruleta");
+                initWheel();
+                currentStep = "ruleta";
+                btn.style.display = "none";
             }
         }
 
@@ -142,7 +186,6 @@
             init3D('3d-frame', m.t);
         }
 
-        // --- RULETA ---
         function initWheel() {
             const canvas = document.getElementById('wheelCanvas');
             const ctx = canvas.getContext('2d');
@@ -158,7 +201,7 @@
                 ctx.translate(250, 250);
                 ctx.rotate(i * arc + arc / 2);
                 ctx.fillStyle = "#000";
-                ctx.font = "bold 13px Orbitron";
+                ctx.font = "bold 12px Orbitron";
                 ctx.fillText(name.toUpperCase(), 100, 5);
                 ctx.restore();
             });
@@ -187,7 +230,7 @@
             document.getElementById('res-overlay').style.display = 'none';
             const btn = document.getElementById('ctrlBtn');
             btn.style.display = "block";
-            btn.innerText = "FINALIZAR PRESENTACIÓN >>";
+            btn.innerText = "FINALIZAR >>";
             btn.onclick = () => {
                 changeScene("s-ruleta", "s-final");
                 btn.style.display = "none";
